@@ -41,10 +41,6 @@ def track_event(event_name, properties={}):
         if mp:
             mp.track(user_id, event_name, properties)
             
-            # VISUAL SUCCESS (You can remove this line later once it works)
-            st.success(f"✅ Data sent to Mixpanel: {event_name}")
-            time.sleep(1) # Short pause to see the message
-            
     except Exception as e:
         # Don't crash the app if analytics fails
         st.warning(f"⚠️ Analytics Error: {e}")
