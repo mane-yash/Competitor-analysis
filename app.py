@@ -27,7 +27,7 @@ if "POSTHOG_API_KEY" in st.secrets:
 
 # --- IMPROVED ANALYTICS FUNCTION ---
 def track_event(event_name, properties={}):
-    """Debug Mode: Logs errors to the screen"""
+    """Debug Mode: Logs errors and WAITS so you can see them"""
     try:
         user_id = st.session_state.get("user_email", "anonymous_visitor")
         
@@ -37,12 +37,15 @@ def track_event(event_name, properties={}):
         posthog.capture(user_id, event_name, properties=properties)
         posthog.flush()
         
-        # VISUAL CONFIRMATION (Delete this later)
+        # VISUAL CONFIRMATION
         st.success(f"✅ Data sent to PostHog: {event_name}") 
         
+        # PAUSE FOR 3 SECONDS SO YOU CAN SEE IT
+        time.sleep(3) 
+        
     except Exception as e:
-        # SHOW THE ERROR
         st.error(f"🚨 Analytics Failed: {e}")
+        time.sleep(5) # Pause longer for errors
 
 # --- 3. LOGIN GATEKEEPER ---
 if "user_email" not in st.session_state:
