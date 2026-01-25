@@ -25,17 +25,18 @@ if "POSTHOG_API_KEY" in st.secrets:
     posthog.project_api_key = st.secrets["POSTHOG_API_KEY"]
     posthog.host = "https://us.i.posthog.com"
 
+# --- IMPROVED ANALYTICS FUNCTION ---
 def track_event(event_name, properties={}):
     """Logs user actions linked to their email"""
     try:
-        # Get the email if they are logged in
         user_id = st.session_state.get("user_email", "anonymous_visitor")
         
-        # Link this event to the specific user
         if user_id != "anonymous_visitor":
             posthog.identify(user_id)
         
         posthog.capture(user_id, event_name, properties=properties)
+        # FORCE SEND IMMEDIATELY
+        posthog.flush() 
     except:
         pass
 
