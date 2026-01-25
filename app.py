@@ -21,32 +21,41 @@ except:
     st.stop()
 
 # --- 2. ANALYTICS (USER TRACKING) ---
-if "POSTHOG_API_KEY" in st.secrets:
-    posthog.project_api_key = st.secrets["POSTHOG_API_KEY"]
-    posthog.host = "https://us.i.posthog.com"
+# CHANGE THIS IMPORT
+from posthog import Posthog  # <--- Notice the capital 'P'
 
+# ... (keep your other imports like pandas, genai, etc.)
+
+# --- 2. ANALYTICS SETUP (New Client Method) ---
+if "POSTHOG_API_KEY" in st.secrets:
+    # Create a dedicated client connection
+    ph_client = Posthog(
+        project_api_key=st.secrets["POSTHOG_API_KEY"],
+        host="https://us.i.posthog.com"
+    )
+else:
+    ph_client = None
 # --- IMPROVED ANALYTICS FUNCTION ---
 def track_event(event_name, properties={}):
-    """Debug Mode: Logs errors and WAITS so you can see them"""
+    """Robust Logging with Client Check"""
     try:
-        user_id = st.session_state.get("user_email", "anonymous_visitor")
-        
-        if user_id != "anonymous_visitor":
-            posthog.identify(user_id)
-        
-        posthog.capture(user_id, event_name, properties=properties)
-        posthog.flush()
-        
-        # VISUAL CONFIRMATION
-        st.success(f"✅ Data sent to PostHog: {event_name}") 
-        
-        # PAUSE FOR 3 SECONDS SO YOU CAN SEE IT
-        time.sleep(3) 
-        
+        # Only try to track if we have a valid client
+        if ph_client:
+            user_id = st.session_state.get("user_email", "anonymous_visitor")
+            
+            if user_id != "anonymous_visitor":
+                ph_client.identify(user_id)  # Works on the client instance!
+            
+            ph_client.capture(user_id, event_name, properties)
+            # ph_client.flush() is automatic usually, but strictly speaking rarely needed here
+            
+            # VISUAL SUCCESS
+            st.success(f"✅ Data sent: {event_name}")
+            time.sleep(1) # Short pause to see it
+            
     except Exception as e:
-        st.error(f"🚨 Analytics Failed: {e}")
-        time.sleep(5) # Pause longer for errors
-
+        # If it fails, print why but DON'T crash the app
+        st.warning(f"⚠️ Analytics skipped: {e}")
 # --- 3. LOGIN GATEKEEPER ---
 if "user_email" not in st.session_state:
     # --- LOGIN SCREEN UI ---
