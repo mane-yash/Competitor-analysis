@@ -4,7 +4,7 @@ from google_play_scraper import Sort, reviews, app
 import google.generativeai as genai
 import re
 import time
-import posthog
+from mixpanel import Mixpanel  # <--- CHANGED: Now using Mixpanel
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(page_title="ProductIQ | Login", page_icon="🔐", layout="centered")
@@ -20,42 +20,35 @@ except:
     st.error("🚨 Admin Alert: Secrets file not found.")
     st.stop()
 
-# --- 2. ANALYTICS (USER TRACKING) ---
-# CHANGE THIS IMPORT
-from posthog import Posthog  # <--- Notice the capital 'P'
-
-# ... (keep your other imports like pandas, genai, etc.)
-
-# --- 2. ANALYTICS SETUP (New Client Method) ---
-if "POSTHOG_API_KEY" in st.secrets:
-    # Create a dedicated client connection
-    ph_client = Posthog(
-        project_api_key=st.secrets["POSTHOG_API_KEY"],
-        host="https://us.i.posthog.com"
-    )
+# --- 2. ANALYTICS SETUP (Mixpanel) ---
+# We check for the Mixpanel Token now instead of PostHog Key
+if "MIXPANEL_TOKEN" in st.secrets:
+    mp = Mixpanel(st.secrets["MIXPANEL_TOKEN"])
 else:
-    ph_client = None
+    mp = None
+
 # --- IMPROVED ANALYTICS FUNCTION ---
 def track_event(event_name, properties={}):
-    """Robust Logging with Client Check"""
+    """Logs data to Mixpanel safely"""
     try:
-        # Only try to track if we have a valid client
-        if ph_client:
-            user_id = st.session_state.get("user_email", "anonymous_visitor")
+        # 1. Get User ID
+        user_id = st.session_state.get("user_email", "anonymous_visitor")
+        
+        # 2. Add email to properties (so you see WHO did it)
+        properties["$email"] = user_id
+        
+        # 3. Send to Mixpanel
+        if mp:
+            mp.track(user_id, event_name, properties)
             
-            if user_id != "anonymous_visitor":
-                ph_client.identify(user_id)  # Works on the client instance!
-            
-            ph_client.capture(user_id, event_name, properties)
-            # ph_client.flush() is automatic usually, but strictly speaking rarely needed here
-            
-            # VISUAL SUCCESS
-            st.success(f"✅ Data sent: {event_name}")
-            time.sleep(1) # Short pause to see it
+            # VISUAL SUCCESS (You can remove this line later once it works)
+            st.success(f"✅ Data sent to Mixpanel: {event_name}")
+            time.sleep(1) # Short pause to see the message
             
     except Exception as e:
-        # If it fails, print why but DON'T crash the app
-        st.warning(f"⚠️ Analytics skipped: {e}")
+        # Don't crash the app if analytics fails
+        st.warning(f"⚠️ Analytics Error: {e}")
+
 # --- 3. LOGIN GATEKEEPER ---
 if "user_email" not in st.session_state:
     # --- LOGIN SCREEN UI ---
