@@ -46,25 +46,6 @@ def track_event(event_name, properties={}):
         st.warning(f"⚠️ Analytics Error: {e}")
 
 # --- 3. LOGIN GATEKEEPER ---
-if "user_email" not in st.session_state:
-    # --- LOGIN SCREEN UI ---
-    st.title("🔐 ProductIQ Access")
-    st.markdown("Enter your email to access the Competitor Intelligence Suite.")
-    
-    with st.container(border=True):
-        email_input = st.text_input("Email Address", placeholder="name@.com")
-        
-        if st.button("🚀 Enter Dashboard", use_container_width=True):
-            if "@" in email_input and "." in email_input:
-                st.session_state.user_email = email_input
-                track_event("user_login", {"email": email_input})
-                st.rerun()
-            else:
-                st.error("Please enter a valid email address.")
-    
-    st.divider()
-    st.caption("🔒 Secure Access | Powered by Gemini AI")
-    st.stop()  # STOPS THE REST OF THE APP FROM LOADING
 
 # --- MAIN APP (ONLY RUNS AFTER LOGIN) ---
 # Switch layout to wide for the dashboard
