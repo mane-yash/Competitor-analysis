@@ -46,6 +46,10 @@ def track_event(event_name, properties={}):
         st.warning(f"⚠️ Analytics Error: {e}")
 
 # --- 3. LOGIN GATEKEEPER ---
+# --- 3. LOGIN BYPASS (FOR REDDIT LAUNCH) ---
+# Since we removed the login screen, we must set a default email manually
+if "user_email" not in st.session_state:
+    st.session_state.user_email = "reddit_visitor@demo.com"
 
 # --- MAIN APP (ONLY RUNS AFTER LOGIN) ---
 # Switch layout to wide for the dashboard
