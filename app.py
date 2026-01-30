@@ -49,10 +49,10 @@ def track_event(event_name, properties={}):
 if "user_email" not in st.session_state:
     # --- LOGIN SCREEN UI ---
     st.title("🔐 ProductIQ Access")
-    st.markdown("Enter your professional email to access the Competitor Intelligence Suite.")
+    st.markdown("Enter your email to access the Competitor Intelligence Suite.")
     
     with st.container(border=True):
-        email_input = st.text_input("Work Email Address", placeholder="name@company.com")
+        email_input = st.text_input("Email Address", placeholder="name@.com")
         
         if st.button("🚀 Enter Dashboard", use_container_width=True):
             if "@" in email_input and "." in email_input:
