@@ -132,6 +132,10 @@ def fetch_reviews(app_id, region, count):
 if app_mode == "Product Health Check":
     st.title("🏥 Product Health Check")
     st.markdown("Deep dive audit into a single competitor's performance.")
+    app_url = st.text_input(
+    "Paste the Google Play Store URL of the app you want to analyze:",
+    placeholder="Example: https://play.google.com/store/apps/details?id=com.instagram.android"
+)
     
     if 'single_app' not in st.session_state: st.session_state.single_app = None
 
