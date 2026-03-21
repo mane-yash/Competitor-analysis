@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from google_play_scraper import Sort, reviews, app
-import google.generativeai as genai
+from google import genai
 import re
 import time
 from mixpanel import Mixpanel  # <--- CHANGED: Now using Mixpanel
@@ -191,7 +191,7 @@ if app_mode == "Product Health Check":
             with t3:
                 if not df.empty:
                     try:
-                        trend = df.set_index('at').resample('M')['score'].mean()
+                        trend = df.set_index('at').resample('ME')['score'].mean()
                         st.line_chart(trend)
                     except: pass
 
